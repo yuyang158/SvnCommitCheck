@@ -5,7 +5,8 @@ namespace SVNMetaCommitCheck {
 	public enum CommitOperatorType {
 		Add = 1,
 		Modify = 2,
-		Delete = 4
+		Delete = 4,
+		Property = 8
 	}
 
 	public class CommitFileInfo {
@@ -25,7 +26,8 @@ namespace SVNMetaCommitCheck {
 					CommitOperator = CommitOperatorType.Modify;
 					break;
 				default:
-					throw new Exception("Unknown Commit Type : " + type);
+					CommitOperator = CommitOperatorType.Property;
+					break;
 			}
 
 			commitLog = commitLog.Substring(1);
@@ -34,7 +36,7 @@ namespace SVNMetaCommitCheck {
 	}
 
 	public interface IPreCommitFileCheck {
-		bool Check(CommitFileInfo[] infos);
+		bool Check(CommitFileInfo[] infos, string log);
 	}
 
 	public interface IPreCommitLogCheck {

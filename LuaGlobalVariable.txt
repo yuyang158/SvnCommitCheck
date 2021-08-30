@@ -1,1 +1,1 @@
-﻿CS warn error GlobalGame _NetworkService
+﻿CS warn error GlobalGame _NetworkService class typeof

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace SVNMetaCommitCheck {
 	public class UnityMetaCommitCheck : IPreCommitFileCheck {
-		public bool Check(CommitFileInfo[] infos) {
+		public bool Check(CommitFileInfo[] infos, string log) {
 			foreach (var info in infos) {
 				if (info.CommitOperator == CommitOperatorType.Modify) {
 					continue;

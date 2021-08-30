@@ -11,8 +11,10 @@ namespace SVNMetaCommitCheck {
 			luaGlobalVariables = File.ReadAllText("./LuaGlobalVariable.txt");
 		}
 
-		public bool Check(CommitFileInfo[] infos) {
-			Debugger.Break();
+		public bool Check(CommitFileInfo[] infos, string log) {
+			if (log.Contains("--ignore-lua-check")) {
+				return true;
+			}
 			var collectLuaFiles = new List<string>();
 			foreach (var item in infos) {
 				if (item.CommitOperator == CommitOperatorType.Delete)
@@ -25,8 +27,21 @@ namespace SVNMetaCommitCheck {
 				var outputLuaFile = item.FilePath.Replace('/', '.');
 				using (var process = new Process()) {
 					process.StartInfo.FileName = Constant.SvnLookExecPath;
+					process.StartInfo.UseShellExecute = false;
+					process.StartInfo.RedirectStandardOutput = true;
 					process.StartInfo.CreateNoWindow = true;
-					process.StartInfo.Arguments = $"cat -t {Constant.TransactionId} {Constant.RepoPath} {item.FilePath} > {outputLuaFile}";
+					process.StartInfo.Arguments = $"cat -t {Constant.TransactionId} {Constant.RepoPath}" +
+						$" {item.FilePath}";
+					process.Start();
+
+					using (var stream = new FileStream(outputLuaFile, FileMode.OpenOrCreate))
+					using (var luaWriter = new StreamWriter(stream)) {
+						while (!process.StandardOutput.EndOfStream) {
+							luaWriter.WriteLine(process.StandardOutput.ReadLine());
+						}
+					}
+
+					process.WaitForExit();
 				}
 
 				collectLuaFiles.Add(outputLuaFile);
@@ -46,19 +61,25 @@ namespace SVNMetaCommitCheck {
 						" --ignore 142 143 --globals " + luaGlobalVariables
 				};
 				process.Start();
+				string finalLine = "";
 				StringBuilder builder = new StringBuilder();
 				while (!process.StandardOutput.EndOfStream) {
 					var line = process.StandardOutput.ReadLine();
-					if (line.EndsWith("OK")) {
-						continue;
-					}
-
 					builder.AppendLine(line);
+					finalLine = line;
 				}
 
 				process.WaitForExit();
 
+				foreach (var tmpLuaFile in collectLuaFiles) {
+					File.Delete(tmpLuaFile);
+				}
+
 				if (builder.Length == 0) {
+					return true;
+				}
+
+				if (string.IsNullOrEmpty(finalLine) || finalLine.StartsWith("Total: 0 warnings / 0 errors")) {
 					return true;
 				}
 

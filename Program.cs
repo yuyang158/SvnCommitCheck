@@ -9,6 +9,8 @@ namespace SVNMetaCommitCheck {
 		static int Main(string[] args) {
 			string transactionId = args[1];
 			string repoPath = args[0];
+			Constant.TransactionId = transactionId;
+			Constant.RepoPath = repoPath;
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
@@ -26,17 +28,20 @@ namespace SVNMetaCommitCheck {
 				}
 			}
 
+			string log;
 			using (var process = new Process()) {
 				process.StartInfo.UseShellExecute = false;
 				process.StartInfo.RedirectStandardOutput = true;
 				process.StartInfo.FileName = Constant.SvnLookExecPath;
 				process.StartInfo.Arguments = string.Format("log -t {0} \"{1}\"", transactionId, repoPath);
 				process.Start();
-				string content = process.StandardOutput.ReadToEnd();
+				log = process.StandardOutput.ReadToEnd();
 
-				foreach (var logCheck in logChecks) {
-					if (!logCheck.Check(content)) {
-						return 1;
+				if (!log.Contains("--ignore-log")) {
+					foreach (var logCheck in logChecks) {
+						if (!logCheck.Check(log)) {
+							return 1;
+						}
 					}
 				}
 
@@ -61,7 +66,7 @@ namespace SVNMetaCommitCheck {
 				}
 
 				foreach (var fileCheck in fileChecks) {
-					if (!fileCheck.Check(infos.ToArray())) {
+					if (!fileCheck.Check(infos.ToArray(), log)) {
 						return 1;
 					}
 				}
