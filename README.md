@@ -15,4 +15,4 @@ check svn commit on pre-commit hook
 
 ## 依赖
 
-[LuaCheck](https://github.com/mpeterv/luacheck)
+[LuaCheck](https://github.com/lunarmodules/luacheck)
