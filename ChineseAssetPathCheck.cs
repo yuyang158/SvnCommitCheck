@@ -17,7 +17,7 @@ namespace SVNMetaCommitCheck {
 				}
 
 				if (HasChinese(info.FilePath)) {
-					Console.Error.WriteLine("路径中不可包含中文 : " + info.FilePath);
+					Console.Error.WriteLine("Asset path need to english only : " + info.FilePath);
 					return false;
 				}
 			}

@@ -19,7 +19,7 @@ namespace SVNMetaCommitCheck {
 
 				var filepath = info.FilePath + ".meta";
 				if (Array.Find(infos, item => item.FilePath == filepath) == null) {
-					Console.Error.WriteLine("提示：Meta文件不匹配; " + info.FilePath);
+					Console.Error.WriteLine("Error： Meta file not match: " + info.FilePath);
 					return false;
 				}
 			}
