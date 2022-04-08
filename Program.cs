@@ -6,11 +6,17 @@ using System.Reflection;
 
 namespace SVNMetaCommitCheck {
 	class Program {
+		private static bool CheckAttributeExist(Type typeToCheck, Type attributeType) {
+			var attributes = typeToCheck.GetCustomAttributes(false);
+			foreach (var attr in attributes) {
+				if(attr.GetType() == attributeType) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		static int Main(string[] args) {
-			string transactionId = args[1];
-			string repoPath = args[0];
-			Constant.TransactionId = transactionId;
-			Constant.RepoPath = repoPath;
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
@@ -18,15 +24,19 @@ namespace SVNMetaCommitCheck {
 			List<IPreCommitFileCheck> fileChecks = new List<IPreCommitFileCheck>();
 			var types = Assembly.GetExecutingAssembly().GetTypes();
 			foreach (var type in types) {
-				if (typeof(IPreCommitLogCheck).IsAssignableFrom(type) && !type.IsInterface) {
+				if (typeof(IPreCommitLogCheck).IsAssignableFrom(type) && !type.IsInterface && !CheckAttributeExist(type, typeof(CheckIgnoreAttribute))) {
 					logChecks.Add(Activator.CreateInstance(type) as IPreCommitLogCheck);
 				}
 			}
 			foreach (var type in types) {
-				if (typeof(IPreCommitFileCheck).IsAssignableFrom(type) && !type.IsInterface) {
+				if (typeof(IPreCommitFileCheck).IsAssignableFrom(type) && !type.IsInterface && !CheckAttributeExist(type, typeof(CheckIgnoreAttribute))) {
 					fileChecks.Add(Activator.CreateInstance(type) as IPreCommitFileCheck);
 				}
 			}
+			string transactionId = args[1];
+			string repoPath = args[0];
+			Constant.TransactionId = transactionId;
+			Constant.RepoPath = repoPath;
 
 			string log;
 			using (var process = new Process()) {

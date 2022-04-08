@@ -17,8 +17,14 @@ namespace SVNMetaCommitCheck {
 					continue;
 				}
 
-				var filepath = info.FilePath + ".meta";
-				if (Array.Find(infos, item => item.FilePath == filepath) == null) {
+				string metaFilepath;
+				if(info.FilePath.EndsWith("/")) {
+					metaFilepath = info.FilePath.Substring(0, info.FilePath.Length - 1) + ".meta";
+				}
+				else {
+					metaFilepath = info.FilePath + ".meta";
+				}
+				if (Array.Find(infos, item => item.FilePath == metaFilepath) == null) {
 					Console.Error.WriteLine("Error： Meta file not match: " + info.FilePath);
 					return false;
 				}

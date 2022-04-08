@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes.cs" />
     <Compile Include="ChineseAssetPathCheck.cs" />
     <Compile Include="CommitLogCheck.cs" />
     <Compile Include="Constant.cs" />

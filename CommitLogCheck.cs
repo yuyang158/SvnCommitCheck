@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace SVNMetaCommitCheck {
+	[CheckIgnore]
 	public class CommitLogCheck : IPreCommitLogCheck {
 		public bool Check(string log) {
 			if (log.Length < 4) {
